@@ -12,7 +12,7 @@ var router *gin.Engine
 var connection *sqlx.DB
 var achivmentList []Achivment;
 
-var connectionString = "host=127.0.0.1 port=5432 user=postgres password=12312345 dbname=test sslmode=disable"
+var connectionString = "host=127.0.0.1 port=5432 user=postgres password=master123! dbname=Site sslmode=disable"
 
 func main() {
 	var e error
@@ -26,11 +26,21 @@ func main() {
 	router.Static("/assets/", "front/")
 	router.LoadHTMLGlob("templates/*.html")
 	router.GET("/", handlerIndex)
+	router.GET("/admin", handlerAdminIndex)
 	router.GET("/createAchivment", handlerCreateAchivment)
 	router.POST("/create", handlerCreateAchivmentCreate)
 	router.GET("/r", handlerRemoveAchivment)
-
+	router.GET("/getAchivment", handlerGetAchivment)
 	_ = router.Run(":8080")
+}
+
+func handlerGetAchivment(c *gin.Context) {
+
+	id := c.Query("id")
+	connection.Exec("SELECT FROM achivments WHERE id = $1", id)
+	var a Achivment = Achivment{Id: 0,Name: "asdasd"}
+	c.JSON(200,  gin.H{"Achivments" : a})
+	fmt.Println(id)
 }
 
 
@@ -91,6 +101,28 @@ func handlerCreateAchivmentCreate(c *gin.Context) {
 }
 
 // pkg.go.dev/text/template
+
+func handlerAdminIndex(c *gin.Context) {
+	achivmentList = nil
+	var a Achivment
+	rows, err := connection.DB.Query("select id, name from achivments")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		err := rows.Scan(&a.Id, &a.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		achivmentList = append(achivmentList,a)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.HTML(200, "admin.html", gin.H{"Achivments" : achivmentList})
+}
+
 func handlerIndex(c *gin.Context) {
 	achivmentList = nil
 	var a Achivment
