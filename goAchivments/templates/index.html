@@ -14,7 +14,7 @@
 
 <div class="frameAchivmentList">
     {{range .Achivments}}
-    <div class="Box">
+    <div class="Box" data-idachivment={{.Id}}>
         <title>
            Достижение
 
@@ -27,4 +27,5 @@
     {{end}}
 </div>
 </body>
+<script src="/assets/js/deleteAchivment.js"></script>
 </html>

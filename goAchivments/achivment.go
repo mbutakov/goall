@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // User ...
 type Achivment struct {
@@ -16,6 +18,12 @@ func (u Achivment) Create() error {
 		return e
 	}
 	fmt.Println("Create new user with ID", u.Id)
+
+	return nil
+}
+func (u Achivment) Remove() error {
+	connection.Exec("DELETE FROM achivments WHERE id = $1 RETURNING id",u.Id)
+	fmt.Println("Delete user with ID", u.Id)
 
 	return nil
 }

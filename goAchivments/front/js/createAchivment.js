@@ -12,7 +12,7 @@ if (button) {
             let response = JSON.parse(e.currentTarget.response);
             if ("Error" in response) {
                 if (response.Error == null) {
-                    console.log("Пользователь успешно зарегистрирован");
+                    console.log("Достижение добавлено");
                 } else {
                     console.log(response.Error);
                 }
