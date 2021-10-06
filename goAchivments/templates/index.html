@@ -15,14 +15,16 @@
 
 <div class="frameAchivmentList">
     {{range .Achivments}}
+
     <div class="Box" data-idachivment={{.Id}}>
+
         <title>
-           Достижение
 
         </title>
         <title>
             {{.Name}}
         </title>
+        <img src="assets/img/{{.Image}}.png" align="middle" width="65" height="65" alt="">
 
     </div>
     {{end}}

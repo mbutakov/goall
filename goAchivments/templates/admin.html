@@ -9,19 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;700&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
+РЕЖИМ АДМИНА
 <main>
 </main>
-
 <div class="frameAchivmentList">
     {{range .Achivments}}
     <div class="Box" data-idachivment={{.Id}}>
         <title>
-           Достижение
-
         </title>
         <title>
             {{.Name}}
         </title>
+        <img src="assets/img/{{.Image}}.png" align="middle" width="65" height="65" alt="">
+
+
 
     </div>
     {{end}}

@@ -12,7 +12,7 @@ var router *gin.Engine
 var connection *sqlx.DB
 var achivmentList []Achivment;
 
-var connectionString = "host=127.0.0.1 port=5432 user=postgres password=master123! dbname=Site sslmode=disable"
+var connectionString = "host=127.0.0.1 port=5432 user=postgres password=12312345 dbname=test sslmode=disable"
 
 func main() {
 	var e error
@@ -38,7 +38,28 @@ func handlerGetAchivment(c *gin.Context) {
 
 	id := c.Query("id")
 	connection.Exec("SELECT FROM achivments WHERE id = $1", id)
-	var a Achivment = Achivment{Id: 0,Name: "asdasd"}
+
+
+	var a Achivment
+	rows, err := connection.DB.Query("select * FROM achivments WHERE id = $1", id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		err := rows.Scan(&a.Id, &a.Name, &a.Description,&a.Image)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+
+
+
+
 	c.JSON(200,  gin.H{"Achivments" : a})
 	fmt.Println(id)
 }
@@ -48,6 +69,13 @@ func handlerRemoveAchivment(c *gin.Context) {
 
 	id := c.Query("id")
 	connection.Exec("DELETE FROM achivments WHERE id = $1",id)
+
+
+
+
+
+
+
 
 	//var a Achivment
 	//e := c.BindJSON(&a)
@@ -105,12 +133,12 @@ func handlerCreateAchivmentCreate(c *gin.Context) {
 func handlerAdminIndex(c *gin.Context) {
 	achivmentList = nil
 	var a Achivment
-	rows, err := connection.DB.Query("select id, name from achivments")
+	rows, err := connection.DB.Query("select id, name,image from achivments")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		err := rows.Scan(&a.Id, &a.Name)
+		err := rows.Scan(&a.Id, &a.Name, &a.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -126,12 +154,12 @@ func handlerAdminIndex(c *gin.Context) {
 func handlerIndex(c *gin.Context) {
 	achivmentList = nil
 	var a Achivment
-	rows, err := connection.DB.Query("select id, name from achivments")
+	rows, err := connection.DB.Query("select id, name,image from achivments")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		err := rows.Scan(&a.Id, &a.Name)
+		err := rows.Scan(&a.Id, &a.Name,&a.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
