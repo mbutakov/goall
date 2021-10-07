@@ -40,7 +40,7 @@ function onClickBox(e) {
                 gridInfo.textContent = "Информация";
                 image.id = "id";
                 image.className = "class";
-                image.src = "assets/img/" +ach.Achivments.image + ".png";            // image.src = "IMAGE URL/PATH"
+                image.src = "assets/img/" +ach.Achivments.image;            // image.src = "IMAGE URL/PATH"
                 image.style.width = "100%"
                 image.style.height = "100%"
 

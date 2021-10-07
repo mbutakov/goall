@@ -6,11 +6,12 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 var router *gin.Engine
 var connection *sqlx.DB
-var achivmentList []Achivment;
+var achivmentList []Achivment
 
 var connectionString = "host=127.0.0.1 port=5432 user=postgres password=12312345 dbname=test sslmode=disable"
 
@@ -29,24 +30,21 @@ func main() {
 	router.GET("/admin", handlerAdminIndex)
 	router.GET("/createAchivment", handlerCreateAchivment)
 	router.POST("/create", handlerCreateAchivmentCreate)
+	router.POST("/upload", handlerUploadImage)
 	router.GET("/r", handlerRemoveAchivment)
 	router.GET("/getAchivment", handlerGetAchivment)
 	_ = router.Run(":8080")
 }
 
 func handlerGetAchivment(c *gin.Context) {
-
 	id := c.Query("id")
-	connection.Exec("SELECT FROM achivments WHERE id = $1", id)
-
-
 	var a Achivment
 	rows, err := connection.DB.Query("select * FROM achivments WHERE id = $1", id)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		err := rows.Scan(&a.Id, &a.Name, &a.Description,&a.Image)
+		err := rows.Scan(&a.Id, &a.Name, &a.Description, &a.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,47 +53,13 @@ func handlerGetAchivment(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-
-
-
-
-	c.JSON(200,  gin.H{"Achivments" : a})
+	c.JSON(200, gin.H{"Achivments": a})
 	fmt.Println(id)
 }
 
-
 func handlerRemoveAchivment(c *gin.Context) {
-
 	id := c.Query("id")
-	connection.Exec("DELETE FROM achivments WHERE id = $1",id)
-
-
-
-
-
-
-
-
-	//var a Achivment
-	//e := c.BindJSON(&a)
-	//if e != nil {
-	//	c.JSON(200, gin.H{
-	//		"Error": e.Error(),
-	//	})
-	//	return
-	//}
-	//e = a.Remove()
-	//if e != nil {
-	//	c.JSON(200, gin.H{
-	//		"Error": "Не удалось удалить",
-	//	})
-	//	return
-	//}
-	//
-	//c.JSON(200, gin.H{
-	//	"Error": nil,
-	//})
+	connection.Exec("DELETE FROM achivments WHERE id = $1", id)
 }
 
 func handlerCreateAchivment(c *gin.Context) {
@@ -103,18 +67,15 @@ func handlerCreateAchivment(c *gin.Context) {
 }
 
 func handlerCreateAchivmentCreate(c *gin.Context) {
-
-
 	var a Achivment
-
 	e := c.BindJSON(&a)
+	fmt.Println(e);
 	if e != nil {
 		c.JSON(200, gin.H{
 			"Error": e.Error(),
 		})
 		return
 	}
-
 	e = a.Create()
 	if e != nil {
 		c.JSON(200, gin.H{
@@ -122,13 +83,10 @@ func handlerCreateAchivmentCreate(c *gin.Context) {
 		})
 		return
 	}
-
 	c.JSON(200, gin.H{
 		"Error": nil,
 	})
 }
-
-// pkg.go.dev/text/template
 
 func handlerAdminIndex(c *gin.Context) {
 	achivmentList = nil
@@ -142,13 +100,13 @@ func handlerAdminIndex(c *gin.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		achivmentList = append(achivmentList,a)
+		achivmentList = append(achivmentList, a)
 	}
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-	c.HTML(200, "admin.html", gin.H{"Achivments" : achivmentList})
+	c.HTML(200, "admin.html", gin.H{"Achivments": achivmentList})
 }
 
 func handlerIndex(c *gin.Context) {
@@ -159,17 +117,42 @@ func handlerIndex(c *gin.Context) {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		err := rows.Scan(&a.Id, &a.Name,&a.Image)
+		err := rows.Scan(&a.Id, &a.Name, &a.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
-		achivmentList = append(achivmentList,a)
+		achivmentList = append(achivmentList, a)
 	}
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-	c.HTML(200, "index.html", gin.H{"Achivments" : achivmentList})
+	c.HTML(200, "index.html", gin.H{"Achivments": achivmentList})
 }
 
-
+func handlerUploadImage(c *gin.Context) {
+	form, _ := c.MultipartForm()
+	_, e := os.Stat("front/img")
+	if os.IsNotExist(e) {
+		fmt.Println("ERROR: ", e.Error())
+		e = os.MkdirAll("front/img", 0777)
+		if e != nil {
+			fmt.Println("ERROR: ", e.Error())
+			c.JSON(200, gin.H{
+				"Error": e.Error(),
+			})
+			return
+		}
+	}
+	files := form.File["File"]
+	file := files[0]
+	if e := c.SaveUploadedFile(file, "front/img/"+file.Filename); e != nil {
+		fmt.Println("ERROR: ", e.Error())
+		c.JSON(200, gin.H{
+			"Error": fmt.Sprintf("upload file e: %s", e.Error()),
+		})
+	}
+	c.JSON(200, gin.H{
+		"Error": nil,
+	})
+}

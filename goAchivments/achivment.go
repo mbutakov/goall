@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 // User ...
@@ -13,6 +14,7 @@ type Achivment struct {
 }
 
 func (u Achivment) Create() error {
+	u.Image = strings.TrimPrefix(u.Image, "C:\\fakepath\\")
 	row := connection.QueryRow("INSERT INTO achivments(name,description,image) VALUES ($1,$2,$3) RETURNING id",u.Name,u.Description,u.Image)
 	fmt.Println(row)
 	e := row.Scan(&u.Id)
